@@ -36,7 +36,8 @@
         "ms-azuretools.vscode-docker",
         "eamodio.gitlens",
         "EditorConfig.EditorConfig",
-        "streetsidesoftware.code-spell-checker"
+        "streetsidesoftware.code-spell-checker",
+        "humao.rest-client"
       ]
     }
   },
@@ -45,7 +46,7 @@
   "forwardPorts": [8080, 5432],
 
   // Use 'postCreateCommand' to run commands after the container is created
-  "postCreateCommand": "go mod download && go install github.com/cosmtrek/air@latest && go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest",
+  "postCreateCommand": "git config --global --add safe.directory /workspace && go mod download && go install github.com/cosmtrek/air@latest && go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest",
 
   // Comment out to connect as root instead
   "remoteUser": "vscode"

@@ -7,6 +7,7 @@
 
 # Test binary, built with `go test -c`
 *.test
+bin/
 
 # Output of the go coverage tool
 *.out
@@ -19,7 +20,7 @@ vendor/
 go.work
 
 # Environment files
-claude/
+.claude/
 .local/
 .env
 .env.local
@@ -27,6 +28,8 @@ claude/
 
 # Database files
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite3
 

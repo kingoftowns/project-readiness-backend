@@ -1,0 +1,297 @@
+basePath: /api/v1
+definitions:
+  models.ErrorDetail:
+    properties:
+      details:
+        additionalProperties: true
+        type: object
+      message:
+        type: string
+    type: object
+  models.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      error:
+        $ref: '#/definitions/models.ErrorDetail'
+      message:
+        type: string
+      status:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  models.PaginatedResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+      pagination:
+        $ref: '#/definitions/models.PaginationMeta'
+      status:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  models.PaginationMeta:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  models.Project:
+    properties:
+      app_name_set:
+        type: boolean
+      approvals_removed_on_commit:
+        type: boolean
+      author_approval_prevented:
+        type: boolean
+      branch_protection_enabled:
+        description: Branch protection checks
+        type: boolean
+      codeowner_approval_required:
+        type: boolean
+      codeowners_exists:
+        type: boolean
+      committer_approval_prevented:
+        type: boolean
+      created_at:
+        description: Metadata
+        type: string
+      force_push_disabled:
+        type: boolean
+      min_approvals_required:
+        type: boolean
+      moab_id_set:
+        type: boolean
+      project_id:
+        description: ProjectID is the unique identifier from GitLab
+        type: string
+      project_present:
+        description: GitLab presence checks
+        type: boolean
+      push_merge_restricted:
+        type: boolean
+      push_rules_enabled:
+        description: Merge request checks
+        type: boolean
+      updated_at:
+        type: string
+    type: object
+  models.SuccessResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+      status:
+        type: string
+      timestamp:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API for tracking GitLab project production readiness checks
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: GitLab Project Readiness API
+  version: "1.0"
+paths:
+  /gitlab/projects:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of projects with their readiness status
+      parameters:
+      - default: 50
+        description: Number of items to return (max 100)
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of items to skip
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of projects with pagination metadata
+          schema:
+            $ref: '#/definitions/models.PaginatedResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: List projects
+      tags:
+      - gitlab
+    post:
+      consumes:
+      - application/json
+      description: Create a new project with initial readiness checks
+      parameters:
+      - description: Project data
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/models.Project'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created project
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "409":
+          description: Project already exists
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Create a new project
+      tags:
+      - gitlab
+  /gitlab/projects/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a project by ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Project deleted successfully
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Project ID not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Delete project
+      tags:
+      - gitlab
+    get:
+      consumes:
+      - application/json
+      description: Get a single project with all readiness check data
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project details with readiness status
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Project ID not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get project by ID
+      tags:
+      - gitlab
+    put:
+      consumes:
+      - application/json
+      description: Update an existing project's readiness checks
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated project data
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/models.Project'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated project
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Project not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Update project
+      tags:
+      - gitlab
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the API is healthy and running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Health status
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+      summary: Health check
+      tags:
+      - health
+schemes:
+- http
+- https
+swagger: "2.0"

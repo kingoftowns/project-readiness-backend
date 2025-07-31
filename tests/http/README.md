@@ -84,14 +84,24 @@ If your API runs on a different port, update this variable in each file.
 **Health Check:**
 ```json
 {
-  "status": "healthy",
-  "service": "gitlab-readiness-api"
+  "status": "success",
+  "code": 200,
+  "message": "Service is healthy",
+  "timestamp": "2025-01-31T12:00:00Z",
+  "data": {
+    "status": "healthy",
+    "service": "gitlab-readiness-api"
+  }
 }
 ```
 
 **Project with Analysis:**
 ```json
 {
+  "status": "success",
+  "code": 200,
+  "message": "Project retrieved successfully",
+  "timestamp": "2025-01-31T12:00:00Z",
   "data": {
     "project": {
       "project_id": "example-123",
@@ -108,6 +118,10 @@ If your API runs on a different port, update this variable in each file.
 **Project List:**
 ```json
 {
+  "status": "success",
+  "code": 200,
+  "message": "Projects retrieved successfully",
+  "timestamp": "2025-01-31T12:00:00Z",
   "data": [
     {
       "project_id": "project-1",
@@ -127,9 +141,10 @@ If your API runs on a different port, update this variable in each file.
 All errors follow this format:
 ```json
 {
-  "error": {
-    "message": "Project not found"
-  }
+  "status": "error",
+  "code": 404,
+  "message": "project_id not found",
+  "timestamp": "2025-01-31T12:00:00Z"
 }
 ```
 

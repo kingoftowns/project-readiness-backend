@@ -1,12 +1,8 @@
-# Performance Testing - HTTP Tests
-# These tests help verify performance characteristics
-
 @baseUrl = http://localhost:8080/api/v1
 
 ### Create multiple projects quickly
-# Execute these one after another to populate the database
 
-POST {{baseUrl}}/projects
+POST {{baseUrl}}/gitlab/projects
 Content-Type: application/json
 
 {
@@ -28,7 +24,7 @@ Content-Type: application/json
 
 ###
 
-POST {{baseUrl}}/projects
+POST {{baseUrl}}/gitlab/projects
 Content-Type: application/json
 
 {
@@ -50,7 +46,7 @@ Content-Type: application/json
 
 ###
 
-POST {{baseUrl}}/projects
+POST {{baseUrl}}/gitlab/projects
 Content-Type: application/json
 
 {
@@ -72,7 +68,7 @@ Content-Type: application/json
 
 ###
 
-POST {{baseUrl}}/projects
+POST {{baseUrl}}/gitlab/projects
 Content-Type: application/json
 
 {
@@ -94,7 +90,7 @@ Content-Type: application/json
 
 ###
 
-POST {{baseUrl}}/projects
+POST {{baseUrl}}/gitlab/projects
 Content-Type: application/json
 
 {
@@ -117,48 +113,48 @@ Content-Type: application/json
 ### Test pagination performance with different page sizes
 
 # Small page size
-GET {{baseUrl}}/projects?limit=2&offset=0
+GET {{baseUrl}}/gitlab/projects?limit=2&offset=0
 
 ### 
 
 # Medium page size
-GET {{baseUrl}}/projects?limit=10&offset=0
+GET {{baseUrl}}/gitlab/projects?limit=10&offset=0
 
 ###
 
 # Large page size
-GET {{baseUrl}}/projects?limit=50&offset=0
+GET {{baseUrl}}/gitlab/projects?limit=50&offset=0
 
 ###
 
 # Test offset performance
-GET {{baseUrl}}/projects?limit=2&offset=2
+GET {{baseUrl}}/gitlab/projects?limit=2&offset=2
 
 ###
 
-GET {{baseUrl}}/projects?limit=2&offset=4
+GET {{baseUrl}}/gitlab/projects?limit=2&offset=4
 
 ### Rapid individual project lookups
-GET {{baseUrl}}/projects/perf-test-001
+GET {{baseUrl}}/gitlab/projects/perf-test-001
 
 ###
 
-GET {{baseUrl}}/projects/perf-test-002
+GET {{baseUrl}}/gitlab/projects/perf-test-002
 
 ###
 
-GET {{baseUrl}}/projects/perf-test-003
+GET {{baseUrl}}/gitlab/projects/perf-test-003
 
 ###
 
-GET {{baseUrl}}/projects/perf-test-004
+GET {{baseUrl}}/gitlab/projects/perf-test-004
 
 ###
 
-GET {{baseUrl}}/projects/perf-test-005
+GET {{baseUrl}}/gitlab/projects/perf-test-005
 
 ### Rapid updates (simulating frequent check updates)
-PUT {{baseUrl}}/projects/perf-test-001
+PUT {{baseUrl}}/gitlab/projects/perf-test-001
 Content-Type: application/json
 
 {
@@ -179,7 +175,7 @@ Content-Type: application/json
 
 ###
 
-PUT {{baseUrl}}/projects/perf-test-002
+PUT {{baseUrl}}/gitlab/projects/perf-test-002
 Content-Type: application/json
 
 {
@@ -199,20 +195,20 @@ Content-Type: application/json
 }
 
 ### Cleanup - Delete all performance test projects
-DELETE {{baseUrl}}/projects/perf-test-001
+DELETE {{baseUrl}}/gitlab/projects/perf-test-001
 
 ###
 
-DELETE {{baseUrl}}/projects/perf-test-002
+DELETE {{baseUrl}}/gitlab/projects/perf-test-002
 
 ###
 
-DELETE {{baseUrl}}/projects/perf-test-003
+DELETE {{baseUrl}}/gitlab/projects/perf-test-003
 
 ###
 
-DELETE {{baseUrl}}/projects/perf-test-004
+DELETE {{baseUrl}}/gitlab/projects/perf-test-004
 
 ###
 
-DELETE {{baseUrl}}/projects/perf-test-005
+DELETE {{baseUrl}}/gitlab/projects/perf-test-005

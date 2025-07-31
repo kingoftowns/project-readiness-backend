@@ -1,7 +1,6 @@
 -- Create the gitlab_projects table
 -- This table stores GitLab project information and their production readiness checks
 CREATE TABLE IF NOT EXISTS gitlab_projects (
-    -- Primary key: GitLab project ID
     project_id TEXT PRIMARY KEY,
     
     -- GitLab presence checks
@@ -28,9 +27,6 @@ CREATE TABLE IF NOT EXISTS gitlab_projects (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create an index on created_at for efficient sorting
 CREATE INDEX idx_gitlab_projects_created_at ON gitlab_projects(created_at DESC);
 
 -- Create a trigger to automatically update the updated_at timestamp
--- Note: This syntax works for PostgreSQL. For SQLite, we'll handle this in application code.
--- The migration runner will check the database type and skip this for SQLite.

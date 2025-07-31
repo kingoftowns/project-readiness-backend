@@ -1,5 +1,19 @@
-// Package main is the entry point for the GitLab Readiness API.
-// It demonstrates clean architecture and Go best practices for educational purposes.
+// @title			Project Readiness API
+// @version		1.0
+// @description	API for tracking project production readiness
+// @termsOfService	http://swagger.io/terms/
+//
+// @contact.name	API Support
+// @contact.url	http://www.swagger.io/support
+// @contact.email	support@swagger.io
+//
+// @license.name	MIT
+// @license.url	https://opensource.org/licenses/MIT
+//
+// @host		localhost:8080
+// @BasePath	/api/v1
+//
+// @schemes	http https
 package main
 
 import (
@@ -21,32 +35,26 @@ import (
 )
 
 func main() {
-	// Load .env file if it exists (for local development)
 	if err := godotenv.Load(); err != nil {
-		// It's okay if .env doesn't exist, we'll use environment variables
 		if !os.IsNotExist(err) {
 			slog.Warn("failed to load .env file", "error", err)
 		}
 	}
 
-	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
 		slog.Error("failed to load configuration", "error", err)
 		os.Exit(1)
 	}
 
-	// Set up structured logging
 	logger := setupLogger(cfg.LogLevel)
 	logger.Info("starting gitlab readiness api",
 		"environment", cfg.Environment,
 		"port", cfg.Port,
-		"database_type", cfg.DatabaseType,
+		"database_type", "postgres",
 	)
 
-	// Connect to database
 	dbConfig := database.Config{
-		Type:     cfg.DatabaseType,
 		URL:      cfg.DatabaseURL,
 		MaxConns: cfg.DBMaxConns,
 		MaxIdle:  cfg.DBMaxIdle,
@@ -75,16 +83,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Initialize repository
 	projectRepo := repository.NewProjectRepository(db)
 
-	// Initialize handlers
 	projectHandler := handlers.NewProjectHandler(projectRepo, logger)
 
-	// Set up routes
 	handler := router.New(projectHandler, logger)
 
-	// Create HTTP server
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("%s:%s", cfg.Host, cfg.Port),
 		Handler:      handler,
@@ -93,7 +97,6 @@ func main() {
 		IdleTimeout:  60 * time.Second,
 	}
 
-	// Start server in a goroutine
 	go func() {
 		logger.Info("server starting", "address", srv.Addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -102,14 +105,12 @@ func main() {
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
 	logger.Info("shutting down server...")
 
-	// Give outstanding requests 30 seconds to complete
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -124,7 +125,7 @@ func main() {
 // setupLogger configures structured logging with slog
 func setupLogger(level string) *slog.Logger {
 	var logLevel slog.Level
-	
+
 	switch level {
 	case "debug":
 		logLevel = slog.LevelDebug
@@ -139,12 +140,10 @@ func setupLogger(level string) *slog.Logger {
 	}
 
 	opts := &slog.HandlerOptions{
-		Level: logLevel,
-		// Add source file information in debug mode
+		Level:     logLevel,
 		AddSource: level == "debug",
 	}
 
-	// Use JSON format in production, text format in development
 	var handler slog.Handler
 	if os.Getenv("ENVIRONMENT") == "production" {
 		handler = slog.NewJSONHandler(os.Stdout, opts)

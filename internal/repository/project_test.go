@@ -9,22 +9,26 @@ import (
 	"github.com/user/go-backend/internal/models"
 )
 
-// setupTestDB creates an in-memory SQLite database for testing
+// Note: These tests require a running PostgreSQL instance
+// Run: docker-compose up -d postgres
+// Or use the test database from devcontainer setup
 func setupTestDB(t *testing.T) *database.DB {
+	// Skip tests if no test database is available
+	testURL := "postgres://postgres:postgres@localhost:5432/gitlab_readiness_test?sslmode=disable"
 	cfg := database.Config{
-		Type: "sqlite",
-		URL:  ":memory:",
+		URL: testURL,
 	}
 
 	db, err := database.NewConnection(cfg)
 	if err != nil {
-		t.Fatalf("failed to create test database: %v", err)
+		t.Skipf("Skipping test - PostgreSQL not available: %v", err)
 	}
 
-	// Create test schema
+	_, _ = db.Exec("DROP TABLE IF EXISTS gitlab_projects")
+
 	schema := `
 		CREATE TABLE gitlab_projects (
-			project_id TEXT PRIMARY KEY,
+			project_id VARCHAR(255) PRIMARY KEY,
 			project_present BOOLEAN DEFAULT FALSE,
 			app_name_set BOOLEAN DEFAULT FALSE,
 			moab_id_set BOOLEAN DEFAULT FALSE,
@@ -38,8 +42,8 @@ func setupTestDB(t *testing.T) *database.DB {
 			author_approval_prevented BOOLEAN DEFAULT FALSE,
 			committer_approval_prevented BOOLEAN DEFAULT FALSE,
 			approvals_removed_on_commit BOOLEAN DEFAULT FALSE,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+			updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 		)
 	`
 
@@ -65,13 +69,11 @@ func TestProjectRepository_Create(t *testing.T) {
 		CodeownersExists: true,
 	}
 
-	// Test create
 	err := repo.Create(ctx, project)
 	if err != nil {
 		t.Fatalf("failed to create project: %v", err)
 	}
 
-	// Verify project was created
 	retrieved, err := repo.GetByID(ctx, "test-123")
 	if err != nil {
 		t.Fatalf("failed to retrieve project: %v", err)
@@ -90,7 +92,6 @@ func TestProjectRepository_Create(t *testing.T) {
 		t.Errorf("MoabIDSet = %v, want %v", retrieved.MoabIDSet, project.MoabIDSet)
 	}
 
-	// Test duplicate create
 	err = repo.Create(ctx, project)
 	if err == nil {
 		t.Error("expected error when creating duplicate project")
@@ -104,7 +105,6 @@ func TestProjectRepository_Update(t *testing.T) {
 	repo := NewProjectRepository(db)
 	ctx := context.Background()
 
-	// Create initial project
 	project := &models.Project{
 		ProjectID:      "update-test",
 		ProjectPresent: true,
@@ -116,7 +116,6 @@ func TestProjectRepository_Update(t *testing.T) {
 		t.Fatalf("failed to create project: %v", err)
 	}
 
-	// Update project
 	project.AppNameSet = true
 	project.MoabIDSet = true
 
@@ -124,7 +123,6 @@ func TestProjectRepository_Update(t *testing.T) {
 		t.Fatalf("failed to update project: %v", err)
 	}
 
-	// Verify update
 	retrieved, err := repo.GetByID(ctx, "update-test")
 	if err != nil {
 		t.Fatalf("failed to retrieve project: %v", err)
@@ -137,7 +135,6 @@ func TestProjectRepository_Update(t *testing.T) {
 		t.Error("MoabIDSet should be true after update")
 	}
 
-	// Test update non-existent project
 	nonExistent := &models.Project{
 		ProjectID: "does-not-exist",
 	}
@@ -154,7 +151,6 @@ func TestProjectRepository_Delete(t *testing.T) {
 	repo := NewProjectRepository(db)
 	ctx := context.Background()
 
-	// Create project
 	project := &models.Project{
 		ProjectID:      "delete-test",
 		ProjectPresent: true,
@@ -164,18 +160,15 @@ func TestProjectRepository_Delete(t *testing.T) {
 		t.Fatalf("failed to create project: %v", err)
 	}
 
-	// Delete project
 	if err := repo.Delete(ctx, "delete-test"); err != nil {
 		t.Fatalf("failed to delete project: %v", err)
 	}
 
-	// Verify deletion
 	_, err := repo.GetByID(ctx, "delete-test")
 	if err == nil {
 		t.Error("expected error when getting deleted project")
 	}
 
-	// Test delete non-existent project
 	err = repo.Delete(ctx, "does-not-exist")
 	if err == nil {
 		t.Error("expected error when deleting non-existent project")
@@ -189,7 +182,6 @@ func TestProjectRepository_List(t *testing.T) {
 	repo := NewProjectRepository(db)
 	ctx := context.Background()
 
-	// Create multiple projects
 	projects := []models.Project{
 		{ProjectID: "proj-1", ProjectPresent: true},
 		{ProjectID: "proj-2", ProjectPresent: true},
@@ -199,14 +191,12 @@ func TestProjectRepository_List(t *testing.T) {
 	}
 
 	for i := range projects {
-		// Add small delay to ensure different timestamps
 		time.Sleep(1 * time.Millisecond)
 		if err := repo.Create(ctx, &projects[i]); err != nil {
 			t.Fatalf("failed to create project %s: %v", projects[i].ProjectID, err)
 		}
 	}
 
-	// Test list with pagination
 	tests := []struct {
 		name   string
 		limit  int
@@ -233,7 +223,6 @@ func TestProjectRepository_List(t *testing.T) {
 		})
 	}
 
-	// Test count
 	count, err := repo.Count(ctx)
 	if err != nil {
 		t.Fatalf("failed to count projects: %v", err)

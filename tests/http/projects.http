@@ -1,14 +1,10 @@
-# Project Readiness API - HTTP Tests
-# Use with VSCode REST Client extension
-# Start the API with: make run
-
 @baseUrl = http://localhost:8080/api/v1
 
 ### Health Check
 GET {{baseUrl}}/health
 
 ### Create a new project
-POST {{baseUrl}}/projects
+POST {{baseUrl}}/gitlab/projects
 Content-Type: application/json
 
 {
@@ -29,7 +25,7 @@ Content-Type: application/json
 }
 
 ### Create another project (production ready)
-POST {{baseUrl}}/projects
+POST {{baseUrl}}/gitlab/projects
 Content-Type: application/json
 
 {
@@ -50,7 +46,7 @@ Content-Type: application/json
 }
 
 ### Create a project with minimal checks
-POST {{baseUrl}}/projects
+POST {{baseUrl}}/gitlab/projects
 Content-Type: application/json
 
 {
@@ -71,22 +67,22 @@ Content-Type: application/json
 }
 
 ### Get all projects (default pagination)
-GET {{baseUrl}}/projects
+GET {{baseUrl}}/gitlab/projects
 
 ### Get all projects with pagination
-GET {{baseUrl}}/projects?limit=2&offset=0
+GET {{baseUrl}}/gitlab/projects?limit=2&offset=0
 
 ### Get a specific project
-GET {{baseUrl}}/projects/project-123
+GET {{baseUrl}}/gitlab/projects/project-123
 
 ### Get the production ready project
-GET {{baseUrl}}/projects/prod-ready-456
+GET {{baseUrl}}/gitlab/projects/prod-ready-456
 
 ### Get the minimal project
-GET {{baseUrl}}/projects/minimal-789
+GET {{baseUrl}}/gitlab/projects/minimal-789
 
 ### Update a project (fix the moab_id_set check)
-PUT {{baseUrl}}/projects/project-123
+PUT {{baseUrl}}/gitlab/projects/project-123
 Content-Type: application/json
 
 {
@@ -106,7 +102,7 @@ Content-Type: application/json
 }
 
 ### Update minimal project to add some checks
-PUT {{baseUrl}}/projects/minimal-789
+PUT {{baseUrl}}/gitlab/projects/minimal-789
 Content-Type: application/json
 
 {
@@ -126,13 +122,13 @@ Content-Type: application/json
 }
 
 ### Delete a project
-DELETE {{baseUrl}}/projects/minimal-789
+DELETE {{baseUrl}}/gitlab/projects/minimal-789
 
 ### Try to get deleted project (should return 404)
-GET {{baseUrl}}/projects/minimal-789
+GET {{baseUrl}}/gitlab/projects/minimal-789
 
 ### Try to create project with same ID (should return 409)
-POST {{baseUrl}}/projects
+POST {{baseUrl}}/gitlab/projects
 Content-Type: application/json
 
 {
@@ -141,7 +137,7 @@ Content-Type: application/json
 }
 
 ### Try to update non-existent project (should return 404)
-PUT {{baseUrl}}/projects/does-not-exist
+PUT {{baseUrl}}/gitlab/projects/does-not-exist
 Content-Type: application/json
 
 {
@@ -149,10 +145,10 @@ Content-Type: application/json
 }
 
 ### Try to delete non-existent project (should return 404)
-DELETE {{baseUrl}}/projects/does-not-exist
+DELETE {{baseUrl}}/gitlab/projects/does-not-exist
 
 ### Create project with invalid JSON (should return 400)
-POST {{baseUrl}}/projects
+POST {{baseUrl}}/gitlab/projects
 Content-Type: application/json
 
 {

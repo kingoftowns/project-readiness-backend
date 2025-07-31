@@ -1,5 +1,3 @@
-// Package repository implements the repository pattern for data access.
-// This provides a clean abstraction over the database operations.
 package repository
 
 import (
@@ -12,39 +10,29 @@ import (
 	"github.com/user/go-backend/internal/models"
 )
 
-// ProjectRepository defines the interface for project data operations.
-// Using an interface allows for easy testing with mock implementations.
 type ProjectRepository interface {
-	// Create inserts a new project
 	Create(ctx context.Context, project *models.Project) error
-	
-	// GetByID retrieves a project by its ID
+
 	GetByID(ctx context.Context, projectID string) (*models.Project, error)
-	
-	// Update modifies an existing project
+
 	Update(ctx context.Context, project *models.Project) error
-	
-	// Delete removes a project by its ID
+
 	Delete(ctx context.Context, projectID string) error
-	
-	// List returns all projects with optional filtering
+
 	List(ctx context.Context, limit, offset int) ([]*models.Project, error)
-	
-	// Count returns the total number of projects
+
 	Count(ctx context.Context) (int, error)
 }
 
-// projectRepo is the concrete implementation of ProjectRepository
 type projectRepo struct {
 	db *database.DB
 }
 
-// NewProjectRepository creates a new project repository instance
 func NewProjectRepository(db *database.DB) ProjectRepository {
 	return &projectRepo{db: db}
 }
 
-// Create inserts a new project into the database
+
 func (r *projectRepo) Create(ctx context.Context, project *models.Project) error {
 	query := `
 		INSERT INTO gitlab_projects (
@@ -88,7 +76,6 @@ func (r *projectRepo) Create(ctx context.Context, project *models.Project) error
 	return nil
 }
 
-// GetByID retrieves a project by its ID
 func (r *projectRepo) GetByID(ctx context.Context, projectID string) (*models.Project, error) {
 	query := `
 		SELECT 
@@ -131,7 +118,6 @@ func (r *projectRepo) GetByID(ctx context.Context, projectID string) (*models.Pr
 	return project, nil
 }
 
-// Update modifies an existing project
 func (r *projectRepo) Update(ctx context.Context, project *models.Project) error {
 	query := `
 		UPDATE gitlab_projects SET
@@ -188,7 +174,6 @@ func (r *projectRepo) Update(ctx context.Context, project *models.Project) error
 	return nil
 }
 
-// Delete removes a project by its ID
 func (r *projectRepo) Delete(ctx context.Context, projectID string) error {
 	query := `DELETE FROM gitlab_projects WHERE project_id = $1`
 
@@ -209,7 +194,6 @@ func (r *projectRepo) Delete(ctx context.Context, projectID string) error {
 	return nil
 }
 
-// List returns all projects with pagination
 func (r *projectRepo) List(ctx context.Context, limit, offset int) ([]*models.Project, error) {
 	query := `
 		SELECT 
@@ -263,11 +247,10 @@ func (r *projectRepo) List(ctx context.Context, limit, offset int) ([]*models.Pr
 	return projects, nil
 }
 
-// Count returns the total number of projects
 func (r *projectRepo) Count(ctx context.Context) (int, error) {
 	var count int
 	query := `SELECT COUNT(*) FROM gitlab_projects`
-	
+
 	err := r.db.QueryRowContext(ctx, query).Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("failed to count projects: %w", err)

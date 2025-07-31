@@ -1,71 +1,72 @@
 # GitLab Readiness API
 
-A Go-based backend API that tracks GitLab project production readiness by validating various security and compliance checks.
-
-## Overview
-
-This API provides CRUD operations for managing GitLab project readiness checks. It's designed as an educational project demonstrating Go best practices, clean architecture, and production-ready patterns.
-
-## Features
-
-- RESTful API for GitLab project readiness tracking
-- Support for both SQLite (development) and PostgreSQL (production)
-- Clean architecture with repository pattern
-- Comprehensive logging with structured logs
-- Graceful shutdown handling
-- Docker and Dev Container support
-- VSCode debugging integration
-- Database migrations
+A Go API that tracks project production readiness by validating security and compliance checks.
 
 ## Requirements
 
-- Go 1.21 or higher
-- Docker (optional, for dev containers)
-- PostgreSQL (optional, for production setup)
+- Go 1.21+
+- PostgreSQL (database)
+- Docker (optional, for local PostgreSQL)
 
 ## Quick Start
 
-### Local Development
+### Option 1: With Docker (Recommended)
 
-1. Clone the repository:
 ```bash
+# Clone and setup
 git clone <repository-url>
 cd go-backend
+
+# Start PostgreSQL
+docker-compose up -d postgres
+
+# Run the application
+go run cmd/api/main.go
 ```
 
-2. Copy the example environment file:
+### Option 2: With External PostgreSQL
+
 ```bash
-cp .env.example .env
+# Set database connection
+export DATABASE_URL="postgres://username:password@host:port/database?sslmode=disable"
+
+# Run the application
+go run cmd/api/main.go
 ```
 
-3. Run the application:
-```bash
-make run
-```
+### Option 3: Using Dev Containers
+
+1. Open in VSCode
+2. Click "Reopen in Container" when prompted
+3. Run: `go run cmd/api/main.go`
 
 The API will be available at `http://localhost:8080`
 
-### Using Dev Containers
+## Database Configuration
 
-1. Open the project in VSCode
-2. When prompted, click "Reopen in Container"
-3. Once the container is built, run:
-```bash
-make run-dev
-```
+- **Local Development**: Uses Docker Compose PostgreSQL by default
+- **Production**: Set `DATABASE_URL` environment variable
+- **Default Local**: `postgres://postgres:password@localhost:5432/gitlab_readiness?sslmode=disable`
 
 ## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/v1/health` | Health check endpoint |
-| GET | `/api/v1/projects` | List all projects |
-| GET | `/api/v1/projects/{id}` | Get a single project |
-| POST | `/api/v1/projects` | Create a new project |
-| PUT | `/api/v1/projects/{id}` | Update an existing project |
-| DELETE | `/api/v1/projects/{id}` | Delete a project |
+| GET | `/api/v1/gitlab/projects` | List all GitLab projects |
+| GET | `/api/v1/gitlab/projects/{id}` | Get a single GitLab project |
+| POST | `/api/v1/gitlab/projects` | Create a new GitLab project |
+| PUT | `/api/v1/gitlab/projects/{id}` | Update an existing GitLab project |
+| DELETE | `/api/v1/gitlab/projects/{id}` | Delete a GitLab project |
 
-See [docs/API.md](docs/API.md) for detailed API documentation.
+## API Documentation
+
+Swagger UI: `http://localhost:8080/swagger/index.html`
+
+Generate/update docs:
+```bash
+swag init -g cmd/api/main.go
+```
 
 ## Project Structure
 
@@ -89,40 +90,27 @@ go-backend/
 The application uses environment variables for configuration. See `.env.example` for all available options.
 
 Key configuration variables:
-- `DATABASE_TYPE`: `sqlite` or `postgres`
-- `DATABASE_URL`: Database connection string
+- `DATABASE_URL`: PostgreSQL connection string
 - `PORT`: Server port (default: 8080)
 - `LOG_LEVEL`: `debug`, `info`, `warn`, or `error`
 
-## Development
-
-### Running Tests
+## Testing
 
 ```bash
-# Run unit tests
-make test
+# Run tests
+go test ./...
 
-# Run HTTP API tests (requires VSCode REST Client extension)
-# First start the server: make run
-# Then open files in tests/http/ and click "Send Request"
+# Run with coverage
+go test -cover ./...
+
+# Run with verbose output
+go test -v ./...
 ```
 
-### Running with Hot Reload
+## Building
 
 ```bash
-make run-dev
-```
-
-### Linting
-
-```bash
-make lint
-```
-
-### Building
-
-```bash
-make build
+go build -o bin/api cmd/api/main.go
 ```
 
 ## Database Schema
@@ -138,38 +126,16 @@ The application tracks the following GitLab readiness checks:
 
 See [migrations/](migrations/) for the complete schema.
 
-## Debugging
+## Debugging in VSCode
 
-The project includes VSCode debug configurations:
-
-1. **Launch API**: Debug with SQLite
-2. **Launch API (PostgreSQL)**: Debug with PostgreSQL
-3. **Debug Current Test**: Debug the current test file
-
-To debug:
 1. Set breakpoints in your code
 2. Press F5 or go to Run > Start Debugging
-3. Select the appropriate configuration
+3. Select configuration:
+   - **Launch API**: Debug with PostgreSQL
+   - **Debug Current Test**: Debug the current test file
 
-## Production Deployment
+## Production
 
-For production deployment:
-
-1. Set `DATABASE_TYPE=postgres`
-2. Configure `DATABASE_URL` with your PostgreSQL connection string
-3. Set `ENVIRONMENT=production`
-4. Set `LOG_LEVEL=info` or `warn`
-
-## Contributing
-
-This is an educational project demonstrating Go best practices. Key principles:
-
-- Keep it simple and readable
-- Follow standard Go patterns
-- Document complex logic
-- Write tests for critical paths
-- Use the standard library where possible
-
-## License
-
-This project is for educational purposes.
+1. Configure `DATABASE_URL` with PostgreSQL connection string
+2. Set `ENVIRONMENT=production`
+3. Set `LOG_LEVEL=info` or `warn`
