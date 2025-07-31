@@ -1,0 +1,48 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch API",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/cmd/api",
+      "env": {
+        "DATABASE_TYPE": "sqlite",
+        "DATABASE_URL": "gitlab_readiness.db",
+        "LOG_LEVEL": "debug",
+        "ENVIRONMENT": "development"
+      },
+      "args": [],
+      "showLog": true
+    },
+    {
+      "name": "Launch API (PostgreSQL)",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/cmd/api",
+      "env": {
+        "DATABASE_TYPE": "postgres",
+        "DATABASE_URL": "postgres://postgres:postgres@localhost:5432/gitlab_readiness?sslmode=disable",
+        "LOG_LEVEL": "debug",
+        "ENVIRONMENT": "development"
+      },
+      "args": [],
+      "showLog": true
+    },
+    {
+      "name": "Debug Current Test",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${fileDirname}",
+      "env": {
+        "DATABASE_TYPE": "sqlite",
+        "DATABASE_URL": ":memory:",
+        "LOG_LEVEL": "debug"
+      },
+      "args": ["-test.v"]
+    }
+  ]
+}
